@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Input</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Select Task to Show Graph</h1>
+    <form id="graphForm">
+        Task: 
+        <select name="task">
+            <option value="task1">Task 1</option>
+            <option value="task2">Task 2</option>
+            <option value="task3">Task 3</option>
+            <option value="task4">Task 4</option>
+            <option value="task5">Task 5</option>
+        </select>
+        <input type="submit" value="Show Graph">
+    </form>
+    <div id="graph"></div>
+
+    <script>
+        document.getElementById('graphForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const task = document.querySelector('select[name="task"]').value;
+            fetch(`/show_graph?task=${task}`)
+                .then(response => response.json())
+                .then(data => {
+                    const cores = Object.keys(data);
+                    const mins = cores.map(core => data[core].MIN);
+                    const maxs = cores.map(core => data[core].MAX);
+                    const avgs = cores.map(core => data[core].AVG);
+                    
+                    const trace1 = {
+                        x: cores,
+                        y: mins,
+                        name: 'MIN',
+                        type: 'bar'
+                    };
+                    const trace2 = {
+                        x: cores,
+                        y: maxs,
+                        name: 'MAX',
+                        type: 'bar'
+                    };
+                    const trace3 = {
+                        x: cores,
+                        y: avgs,
+                        name: 'AVG',
+                        type: 'bar'
+                    };
+                    
+                    const dataPlot = [trace1, trace2, trace3];
+                    const layout = { barmode: 'group', title: `Statistics for ${task}` };
+                    Plotly.newPlot('graph', dataPlot, layout);
+                });
+        });
+    </script>
+</body>
+</html>
